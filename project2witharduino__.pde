@@ -67,12 +67,12 @@ void setup() { //everything we need to setup once
   PFont myfont = createFont("Futura-Medium",20);
   ControlFont font = new ControlFont(myfont,241);
 
-//xpos,ypos,size,r,g,b,rotation, rotationSpeed, id, highorlow
-  square1 = new Square(width/4, height/2, 100, 200, 255, 255, 500.00, 100, 0);
-  square2 = new Square(width/2, height - 100, 100, 0, 100, 40, 200.00,100,1);
-  square3 = new Square(width/2, height/4, 100, 10, 100, 100, 500.00, 100,2);
+//xpos,ypos,size,r,g,b,rotation, rotationSpeed, id,
+  square1 = new Square(width/4, height/2, 100, 200, 255, 255, 100, 0);
+  square2 = new Square(width/2, height - 100, 100, 200, 200, 40,100,1);
+  square3 = new Square(width/2, height/4, 100, 200, 200, 200, 100,2);
   
-  wheel1 = new RealWheel(500.00, true, "HIGH");
+  wheel1 = new RealWheel(500.00, true, " ");
   wheel2 = new RealWheel(500.00, true, "HIGH");
   wheel3 = new RealWheel(500.00, true, "HIGH");
 
@@ -129,7 +129,7 @@ void draw() {// draw is like our void Loop friend from arduino
 
    //--randomish particles
    for(int i = 0; i < 360; i++){
-    float angle = cos(radians(i* random + particleMove))*width/2;
+    float angle = cos(radians(i* random + particleMove))*width/3;
     float x = width/2+sin(radians(i))*angle;
     float y = height/2+cos(radians(i))*angle;
     ellipse(x, y, 3, 3);
@@ -139,16 +139,15 @@ void draw() {// draw is like our void Loop friend from arduino
   square1.drawsquare();
   square2.drawsquare();
   square3.drawsquare();
+ 
   
-//if(wheel1.HIGHLOW == "HIGH"){
+  //---serial message
+if(wheel1.HIGHLOW == "HIGH"){
   
-//myPort.write('1');
-//println("high");
-//}
-//} else if (wheel1.HIGHLOW == "LOW"){
-// port.write('0');
-// println("low");
-//}
+myPort.write('1');
+
+}
+
 
   
 
@@ -167,9 +166,9 @@ class Square {
   int g;
   int b;
   float rot;
-  float rotationSpeed;
+ 
   int ID;
-  Square(int _xPosition, int _yPosition, int _size, int _r, int _g, int _b, float _rot, float _rotationSpeed, int _ID) {
+  Square(int _xPosition, int _yPosition, int _size, int _r, int _g, int _b, float _rot, int _ID) {
     xPosition = _xPosition;
     yPosition =_yPosition;
     size = _size;
@@ -177,7 +176,6 @@ class Square {
     g = _g;
     b = _b;
     rot = _rot;
-    rotationSpeed = _rotationSpeed;
     ID = _ID;
   }
 
@@ -218,7 +216,7 @@ class Square {
        HIGHLOW = _HIGHLOW;
      }
  
- }
+ }//--end of RealWheel class
 
 public void controlEvent(ControlEvent theEvent) {
   switch(theEvent.getId()) {
@@ -302,38 +300,36 @@ void mouseClicked(){
       highLowBang.hide();
      }
  }
- void serialEvent( Serial myPort) {
-//put the incoming data into a String - 
-//the '\n' is our end delimiter indicating the end of a complete packet
-val = myPort.readStringUntil('\n');
-//make sure our data isn't empty before continuing
-if (val != null) {
- //trim whitespace and formatting characters (like carriage return)
- val = trim(val);
- println(val);
+ //void serialEvent( Serial myPort) {
+////put the incoming data into a String - 
+////the '\n' is our end delimiter indicating the end of a complete packet
+//val = myPort.readStringUntil('\n');
+////make sure our data isn't empty before continuing
+//if (val != null) {
+ ////trim whitespace and formatting characters (like carriage return)
+ //val = trim(val);
+ //println(val);
 
- //look for our 'A' string to start the handshake
- //if it's there, clear the buffer, and send a request for data
- if (firstContact == false) {
-   if (val.equals("A")) {
-     myPort.clear();
-     firstContact = true;
-     myPort.write("A");
-     println("contact");
-   }
- }
- else { //if we've already established contact, keep getting and parsing data
-   println(val);
+ ////look for our 'A' string to start the handshake
+ ////if it's there, clear the buffer, and send a request for data
+ //if (firstContact == false) {
+ //  if (val.equals("A")) {
+ //    myPort.clear();
+ //    firstContact = true;
+ //    //myPort.write("A");
+ //    println("contact");
+ //  }
+ //}
+ //else { //if we've already established contact, keep getting and parsing data
+ //  println(val);
 
-   if (wheel1.HIGHLOW == "HIGH") {                           //if we clicked in the window
-     myPort.write('1');        //send a 1
-     println("1");
-   } else if(wheel1.HIGHLOW == "LOW"){
-      myPort.write('0'); 
-   }
+ //  if (wheel1.HIGHLOW == "HIGH") {                           //if we clicked in the window
+ //    myPort.write(1);        //send a 1
+ //    println("1");
+ //  } 
 
-   // when you've parsed the data you have, ask for more:
-   myPort.write("A");
-   }
- }
-}//
+ //  // when you've parsed the data you have, ask for more:
+ // myPort.write("A");
+ //  }
+ //}
+//}////
