@@ -36,8 +36,9 @@ boolean clickForSlider = false;
 boolean clickForBang = false;
 boolean firstContact = false;
 
+boolean sendValue;
 String processingHIGHLOW;
-
+String previousHIGHLOWvalue;
 Square square1;
 Square square2;
 Square square3;
@@ -51,6 +52,7 @@ ControlP5 rotationSpeedSlider;
 ControlP5 highLowBang;
 Serial myPort;
 
+String [] HIGHLOWarray = new String[1];
 
 void setup() { //everything we need to setup once
   size(640, 640); //set up the size of the project
@@ -72,30 +74,30 @@ void setup() { //everything we need to setup once
   square2 = new Square(width/2, height - 100, 100, 200, 200, 40,100,1);
   square3 = new Square(width/2, height/4, 100, 200, 200, 200, 100,2);
   
-  wheel1 = new RealWheel(500.00, true, " ");
-  wheel2 = new RealWheel(500.00, true, "HIGH");
-  wheel3 = new RealWheel(500.00, true, "HIGH");
+  wheel1 = new RealWheel(500, true, " ");
+  wheel2 = new RealWheel(500, true, "HIGH");
+  wheel3 = new RealWheel(500, true, "HIGH");
 
   
-  for (int i =1; i <=3; i++){
-    rotationSpeedSlider.addSlider("Rotation Speed Wheel " + i)
-       .setPosition(width/2,height/2 +i*40)
+  //for (int i =1; i <=3; i++){
+    rotationSpeedSlider.addSlider("Rotation Speed Wheel 1")
+       .setPosition(width/2,height/2)
        .setSize(200,20)
-       .setRange(0,200)
-       .setValue(100)
-       .setId(i)
+       .setRange(300,1000)
+       .setValue(500)
+       .setId(1)
      //.setBroadcast(false)
      ;
      rotationSpeedSlider.hide();
-     rotationSpeedSlider.getController("Rotation Speed Wheel " + i).getCaptionLabel().align(ControlP5.RIGHT, ControlP5.TOP_OUTSIDE).setPaddingX(0);
+     rotationSpeedSlider.getController("Rotation Speed Wheel 1").getCaptionLabel().align(ControlP5.RIGHT, ControlP5.TOP_OUTSIDE).setPaddingX(0);
     
-     rotationSpeedSlider.getController("Rotation Speed Wheel " + i)
+     rotationSpeedSlider.getController("Rotation Speed Wheel 1")
        .getCaptionLabel()
        .setFont(font)
        .toUpperCase(false)
        .setSize(14)
      ;
-}
+//}
 
  for(int b=1;b<=3;b++) {
    highLowBang.addBang("Bang Control "+b)
@@ -140,21 +142,28 @@ void draw() {// draw is like our void Loop friend from arduino
   square2.drawsquare();
   square3.drawsquare();
  
+ 
+ for(int i =0; i< HIGHLOWarray.length; i++){
+  HIGHLOWarray[i] = wheel1.HIGHLOW;
+ 
+ }
+ 
   
   //---serial message
-if(wheel1.HIGHLOW == "HIGH"){
   
-myPort.write('1');
-
+if(wheel1.HIGHLOW == "HIGH" && sendValue == true){
+  myPort.write('1');
+  sendValue = false;
+} else if(HIGHLOWarray[0] =="LOW" && sendValue == true){
+  myPort.write('0');
+  sendValue = false;
 }
-
-
   
 
-
-//println("square 1 " + square1.rotationSpeed);
-   //float rotation = rotationSpeedSlider.getController("Rotation Speed").getValue();
-   // println(rotation);
+  
+if(keyPressed){
+myPort.write('R');
+}
 }//---end of draw()
 
 
@@ -207,10 +216,10 @@ class Square {
 } //--end of square class
 
  class RealWheel{
-   float rotationSpeed;
+   int rotationSpeed;
    boolean spinning;
    String HIGHLOW;
-     RealWheel(float _rotationSpeed, boolean _spinning, String _HIGHLOW){
+     RealWheel(int _rotationSpeed, boolean _spinning, String _HIGHLOW){
        rotationSpeed =_rotationSpeed;
        spinning = _spinning;
        HIGHLOW = _HIGHLOW;
@@ -234,10 +243,14 @@ public void controlEvent(ControlEvent theEvent) {
     break;
     
     case(4): if(bang1ClickHasHappened == false){  // numberboxB is registered with id 2
+              sendValue = true;
+             previousHIGHLOWvalue = wheel1.HIGHLOW;
              wheel1.HIGHLOW = "LOW";
              ClockDirection = "Clockwise ";
              bang1ClickHasHappened = true;
           } else {
+            sendValue = true;
+            previousHIGHLOWvalue = wheel1.HIGHLOW;
             wheel1.HIGHLOW = "HIGH";
              ClockDirection = "Counter Clockwise ";
              bang1ClickHasHappened = false;
