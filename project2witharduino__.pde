@@ -34,9 +34,10 @@ float velocity = 0;// set initial force of turn to 0
 float acceleration = 0.1; //set initial acceleration to 0.001 for a gradual application
 boolean clickForSlider = false;
 boolean clickForBang = false;
+boolean clickForBang2 = false;
 boolean firstContact = false;
 
-boolean sendValue;
+boolean sendValue = false;
 String processingHIGHLOW;
 String previousHIGHLOWvalue;
 Square square1;
@@ -50,6 +51,7 @@ RealWheel wheel3;
 int count;
 ControlP5 rotationSpeedSlider;
 ControlP5 highLowBang;
+ControlP5 spinning;
 Serial myPort;
 
 String [] HIGHLOWarray = new String[1];
@@ -63,6 +65,7 @@ void setup() { //everything we need to setup once
   
   rotationSpeedSlider = new ControlP5(this);
   highLowBang = new ControlP5(this);
+   spinning = new ControlP5(this);
   myPort = new Serial(this, Serial.list()[2], 9600);
   myPort.bufferUntil('\n'); 
   
@@ -79,7 +82,7 @@ void setup() { //everything we need to setup once
   wheel3 = new RealWheel(500, true, "HIGH");
 
   
-  //for (int i =1; i <=3; i++){
+  
     rotationSpeedSlider.addSlider("Rotation Speed Wheel 1")
        .setPosition(width/2,height/2)
        .setSize(200,20)
@@ -97,7 +100,7 @@ void setup() { //everything we need to setup once
        .toUpperCase(false)
        .setSize(14)
      ;
-//}
+
 
  for(int b=1;b<=3;b++) {
    highLowBang.addBang("Bang Control "+b)
@@ -115,6 +118,24 @@ void setup() { //everything we need to setup once
      ;
      highLowBang.getController("Bang Control " + b).getCaptionLabel().align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE).setPaddingX(0);
      highLowBang.hide();
+ }
+ 
+  for(int b=1;b<=3;b++) {
+   spinning.addBang("Bang Control "+b)
+      .setPosition(width/3 + b*100, height/2 + b*30)
+      .setSize(40, 40)
+      .setId(6+b)
+      .setLabel("Wheel " + b + "   Start/Stop")
+      ;
+      
+       spinning.getController("Bang Control " + b)
+       .getCaptionLabel()
+       .setFont(font)
+       .toUpperCase(false)
+       .setSize(14)
+     ;
+     spinning.getController("Bang Control " + b).getCaptionLabel().align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE).setPaddingX(0);
+     spinning.hide();
  }
   
  
@@ -143,25 +164,22 @@ void draw() {// draw is like our void Loop friend from arduino
   square3.drawsquare();
  
  
- for(int i =0; i< HIGHLOWarray.length; i++){
-  HIGHLOWarray[i] = wheel1.HIGHLOW;
- 
- }
+
  
   
   //---serial message
   
-if(wheel1.HIGHLOW == "HIGH" && sendValue == true){
+if((wheel1.HIGHLOW == "HIGH") && (sendValue == true)){
   myPort.write('1');
   sendValue = false;
+  println("sent");
 } else if(HIGHLOWarray[0] =="LOW" && sendValue == true){
   myPort.write('0');
   sendValue = false;
 }
   
 
-  
-if(keyPressed){
+ if(keyPressed){
 myPort.write('R');
 }
 }//---end of draw()
@@ -259,10 +277,12 @@ public void controlEvent(ControlEvent theEvent) {
     break;
     
     case(5): if(bang2ClickHasHappened == false){  // numberboxB is registered with id 2
+            sendValue = true;
              wheel2.HIGHLOW = "LOW";
              ClockDirection = "Clockwise ";
              bang2ClickHasHappened = true;
           } else {
+            sendValue=true;
             wheel2.HIGHLOW = "HIGH";
              ClockDirection = "Counter Clockwise ";
              bang2ClickHasHappened = false;
@@ -270,15 +290,19 @@ public void controlEvent(ControlEvent theEvent) {
     break;
     
     case(6): if(bang3ClickHasHappened == false){
+              sendValue = true;
              wheel3.HIGHLOW = "LOW";
              ClockDirection = "Clockwise ";
              bang3ClickHasHappened = true;
           } else {
+            sendValue = true;
             wheel3.HIGHLOW = "HIGH";
              ClockDirection = "Counter Clockwise ";
              bang3ClickHasHappened = false;
           }
     break;
+    //case(7): if(bang4
+    
   }
   
   
@@ -312,37 +336,18 @@ void mouseClicked(){
       }else {
       highLowBang.hide();
      }
+     
+       if(mouseX>square3.xPosition && mouseX <square3.xPosition + square3.size && mouseY>square3.yPosition && mouseY <square3.yPosition + square3.size && clickForBang2==false){
+    clickForBang2 = true;
+      } else if(mouseX>square3.xPosition && mouseX <square3.xPosition + square3.size && mouseY>square3.yPosition && mouseY <square3.yPosition + square3.size && clickForBang2==true) {
+      clickForBang2 = false;
+      }
+    if(clickForBang2 && clickForSlider == false  ){
+      spinning.show();
+      }else {
+      spinning.hide();
+     }
  }
- //void serialEvent( Serial myPort) {
-////put the incoming data into a String - 
-////the '\n' is our end delimiter indicating the end of a complete packet
-//val = myPort.readStringUntil('\n');
-////make sure our data isn't empty before continuing
-//if (val != null) {
- ////trim whitespace and formatting characters (like carriage return)
- //val = trim(val);
- //println(val);
-
- ////look for our 'A' string to start the handshake
- ////if it's there, clear the buffer, and send a request for data
- //if (firstContact == false) {
- //  if (val.equals("A")) {
- //    myPort.clear();
- //    firstContact = true;
- //    //myPort.write("A");
- //    println("contact");
- //  }
- //}
- //else { //if we've already established contact, keep getting and parsing data
- //  println(val);
-
- //  if (wheel1.HIGHLOW == "HIGH") {                           //if we clicked in the window
- //    myPort.write(1);        //send a 1
- //    println("1");
- //  } 
-
- //  // when you've parsed the data you have, ask for more:
- // myPort.write("A");
- //  }
- //}
-//}////
+ 
+ 
+ 
