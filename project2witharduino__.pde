@@ -25,6 +25,9 @@ PFont myfont;
 boolean bang1ClickHasHappened;
 boolean bang2ClickHasHappened;
 boolean bang3ClickHasHappened;
+boolean bang4ClickHasHappened;
+boolean bang5ClickHasHappened;
+boolean bang6ClickHasHappened;
 String ClockDirection = "Counter Clockwise ";
 
 float particleMove;
@@ -106,7 +109,7 @@ void setup() { //everything we need to setup once
    highLowBang.addBang("Bang Control "+b)
       .setPosition(width/3 + b*100, height/2 + b*30)
       .setSize(40, 40)
-      .setId(3+b)
+      .setId(b+1)
       .setLabel(ClockDirection+b)
       ;
       //highLowBang.hide();
@@ -124,7 +127,7 @@ void setup() { //everything we need to setup once
    spinning.addBang("Bang Control "+b)
       .setPosition(width/3 + b*100, height/2 + b*30)
       .setSize(40, 40)
-      .setId(6+b)
+      .setId(4+b)
       .setLabel("Wheel " + b + "   Start/Stop")
       ;
       
@@ -173,8 +176,32 @@ if((wheel1.HIGHLOW == "HIGH") && (sendValue == true)){
   myPort.write('1');
   sendValue = false;
   println("sent");
-} else if(HIGHLOWarray[0] =="LOW" && sendValue == true){
+} else if(wheel1.HIGHLOW =="LOW" && sendValue == true){
   myPort.write('0');
+  sendValue = false;
+}
+if((wheel1.spinning == false) && (sendValue == true)){
+  myPort.write('2');
+  sendValue = false;
+  println("sent spinning");
+} else if((wheel1.spinning == true) && (sendValue == true)){
+  myPort.write('3');
+  sendValue = false;
+}
+if((wheel2.spinning == false) && (sendValue == true)){
+  myPort.write('4');
+  sendValue = false;
+  println("sent spinning");
+} else if((wheel2.spinning == true) && (sendValue == true)){
+  myPort.write('5');
+  sendValue = false;
+}
+if((wheel3.spinning == false) && (sendValue == true)){
+  myPort.write('6');
+  sendValue = false;
+  println("sent spinning");
+} else if((wheel3.spinning == true) && (sendValue == true)){
+  myPort.write('7');
   sendValue = false;
 }
   
@@ -251,16 +278,7 @@ public void controlEvent(ControlEvent theEvent) {
      wheel1.rotationSpeed =(int) (theEvent.getController().getValue());
      
     break;
-    case(2):  // numberboxB is registered with id 2
-    wheel2.rotationSpeed =(int) (theEvent.getController().getValue());
-   
-    break;
-    
-    case(3):  // numberboxB is registered with id 2
-    wheel3.rotationSpeed =(int) (theEvent.getController().getValue());
-    break;
-    
-    case(4): if(bang1ClickHasHappened == false){  // numberboxB is registered with id 2
+    case(2): if(bang1ClickHasHappened == false){  // numberboxB is registered with id 2
               sendValue = true;
              previousHIGHLOWvalue = wheel1.HIGHLOW;
              wheel1.HIGHLOW = "LOW";
@@ -276,7 +294,7 @@ public void controlEvent(ControlEvent theEvent) {
             
     break;
     
-    case(5): if(bang2ClickHasHappened == false){  // numberboxB is registered with id 2
+    case(3): if(bang2ClickHasHappened == false){  // numberboxB is registered with id 2
             sendValue = true;
              wheel2.HIGHLOW = "LOW";
              ClockDirection = "Clockwise ";
@@ -289,7 +307,7 @@ public void controlEvent(ControlEvent theEvent) {
           }
     break;
     
-    case(6): if(bang3ClickHasHappened == false){
+    case(4): if(bang3ClickHasHappened == false){
               sendValue = true;
              wheel3.HIGHLOW = "LOW";
              ClockDirection = "Clockwise ";
@@ -301,15 +319,46 @@ public void controlEvent(ControlEvent theEvent) {
              bang3ClickHasHappened = false;
           }
     break;
-    //case(7): if(bang4
+    case(5): if(bang4ClickHasHappened == false){
+            sendValue = true;
+           
+            wheel1.spinning = false;
+            bang4ClickHasHappened = true;
+          } else {
+             sendValue = true;
+             wheel1.spinning = true;
+            bang4ClickHasHappened = false;
+          }
+      break;
+      case(6): if(bang5ClickHasHappened == false){
+            sendValue = true;
+            
+            wheel2.spinning = false;
+            bang5ClickHasHappened = true;
+          } else {
+             sendValue = true;
+             wheel2.spinning = true;
+            bang5ClickHasHappened = false;
+                }
+      break;
+      case(7): if(bang6ClickHasHappened == false){
+            sendValue = true;
+           
+            wheel3.spinning = false;
+            bang6ClickHasHappened = true;
+          } else {
+             sendValue = true;
+             wheel3.spinning = true;
+            bang6ClickHasHappened = false;
+          }
+      break;
+            
     
   }
   
   
 }
-public void bang() {
-  
-}
+
 
 void mouseClicked(){  
   
